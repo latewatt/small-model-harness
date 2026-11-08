@@ -36,6 +36,6 @@ def writeup(root, runs, analysis):
     lines += ['', ' '.join(analysis.get('post_findings', [])), '',
               '**What this experiment can establish.** These are actual, sequential local runs with provider-reported tokens and independent grading. The combination was selected on the same small development suite; there is no held-out result. All completed attempts, regressions, source snapshots and trace evidence are retained. Faster early exits are not successful-task efficiency.', '',
               'The next decision should come from a held-out evaluation and a real Terminal-Bench run once the required environment is available. The useful artifact here is an inspectable experiment: change one thing, preserve the failures, and measure correctness separately from valid tool syntax.', '',
-              'See [RESULTS.md](RESULTS.md) for the complete ablation table, per-task logs and failure taxonomy, and [DESIGN.md](DESIGN.md) for the implementation. Regenerate both the numbers here and RESULTS.md with `make report`.', '']
+              'See [RESULTS.md](RESULTS.md) for the complete ablation table, per-task logs and failure taxonomy, and [docs/design.md](docs/design.md) for the implementation. Regenerate both the numbers here and RESULTS.md with `make report`.', '']
     target=root/'WRITEUP.md';target.write_text('\n'.join(lines))
     return target

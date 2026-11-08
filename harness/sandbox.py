@@ -1,9 +1,17 @@
-"""macOS Seatbelt backend. No unconfined fallback for generated shell code."""
+"""Process containment for generated shell code.
+
+Two backends share one contract: the command may read system tools and the
+task workspace, may write only inside the workspace, and has no network.
+- macOS: Seatbelt (`sandbox-exec`).
+- Linux: bubblewrap (`bwrap`) with fresh mount, network and PID namespaces.
+There is no unconfined fallback.
+"""
 import json
 import os
 import platform
 import selectors
 import shlex
+import shutil
 import signal
 import subprocess
 import time
@@ -16,14 +24,38 @@ def quoted_path(path: Path):
     return json.dumps(str(path.resolve()))
 
 
+def detect_backend():
+    system = platform.system()
+    if system == "Darwin" and Path("/usr/bin/sandbox-exec").exists():
+        return "seatbelt"
+    if system == "Linux" and shutil.which("bwrap"):
+        return "bwrap"
+    raise RuntimeError("sandbox requires macOS sandbox-exec or Linux bubblewrap (bwrap); no unsafe fallback")
+
+
+def _venv_paths():
+    """The project venv and the interpreter it points at, both read-only."""
+    venv = ROOT / ".venv"
+    paths = [venv]
+    python = venv / "bin/python"
+    if python.exists():
+        paths.append(python.resolve().parents[1])
+    return paths
+
+
 class Sandbox:
     def __init__(self, work: Path, trace=None, deadline=None, readable=()):
-        if platform.system() != "Darwin" or not Path("/usr/bin/sandbox-exec").exists():
-            raise RuntimeError("local mini-suite requires macOS sandbox-exec; no unsafe fallback")
+        self.backend = detect_backend()
         self.work = work.resolve()
         self.trace, self.deadline = trace, deadline
         self.work.mkdir(parents=True, exist_ok=True)
         (self.work / ".tmp").mkdir(exist_ok=True)
+        self.readable = [Path(p).resolve() for p in readable]
+        if self.backend == "seatbelt":
+            self._write_seatbelt_profile()
+
+    def _write_seatbelt_profile(self):
+        readable = self.readable
         self.profile = self.work.parent / (self.work.name + ".sb")
         read_paths = ["/System", "/usr", "/bin", "/sbin", "/opt/homebrew", "/Library/Apple", "/private/etc", str(ROOT / ".venv"), str(self.work)]
         read_rules = " ".join(f"(subpath {json.dumps(p)})" for p in read_paths)
@@ -37,6 +69,27 @@ class Sandbox:
             f'(allow file-write* (subpath {quoted_path(self.work)}) (literal "/dev/null"))\n'
         )
 
+    def _wrap(self, argv):
+        if self.backend == "seatbelt":
+            return ["/usr/bin/sandbox-exec", "-f", str(self.profile), *argv]
+        # Linux: a fresh root with read-only system directories, the project
+        # interpreter and explicitly readable files; only the workspace is
+        # writable. --unshare-all drops network (loopback only) and gives the
+        # command its own PID namespace, so killing bwrap kills every child.
+        args = ["bwrap", "--unshare-all", "--die-with-parent",
+                "--proc", "/proc", "--dev", "/dev"]
+        for path in ("/usr", "/bin", "/sbin", "/lib", "/lib64", "/lib32", "/etc"):
+            args += ["--ro-bind-try", path, path]
+        for path in _venv_paths():
+            args += ["--ro-bind-try", str(path), str(path)]
+        for path in self.readable:
+            args += ["--ro-bind-try", str(path), str(path)]
+        # Everything outside the workspace bind (including the parents bwrap
+        # creates for it) is read-only, matching the Seatbelt write rule.
+        args += ["--bind", str(self.work), str(self.work), "--remount-ro", "/",
+                 "--chdir", str(self.work)]
+        return args + argv
+
     def run(self, command: str, timeout: float = 12, max_output: int = 262144):
         if self.deadline is not None:
             timeout = min(timeout, max(0.01, self.deadline - time.monotonic()))
@@ -48,11 +101,17 @@ class Sandbox:
         # Preserve identity values (not keys). On macOS bash may call into
         # directory services and abort inside Seatbelt if HOME is absent.
         env.update({k: os.environ[k] for k in ("HOME", "USER", "LOGNAME", "SHELL") if k in os.environ})
+        if self.backend == "bwrap":
+            # The host home directory is not mounted; give tools a writable one.
+            env["HOME"] = str(self.work / ".tmp")
+            # en_US.UTF-8 is often not generated on Linux; C.UTF-8 always is.
+            env["LC_ALL"] = "C.UTF-8"
         started = time.monotonic()
         # Bound individual file growth and CPU time as well as wall time/output.
         limited_command = "ulimit -f 16384; ulimit -t 15; " + command
-        process = subprocess.Popen(["/usr/bin/sandbox-exec", "-f", str(self.profile), "/bin/bash", "--noprofile", "--norc", "-c", limited_command],
-                                   cwd=self.work, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        shell = ["/bin/bash", "--noprofile", "--norc", "-c", limited_command]
+        process = subprocess.Popen(self._wrap(shell), cwd=self.work, env=env,
+                                   stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                    start_new_session=True)
         selector = selectors.DefaultSelector()
         selector.register(process.stdout, selectors.EVENT_READ)

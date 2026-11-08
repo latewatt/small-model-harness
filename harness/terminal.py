@@ -19,7 +19,7 @@ def command(subset, model=None):
         runner += ["-d", spec["dataset"]]
         attempts = "5"
     else:
-        raise ValueError("use SUBSET=tb2-fast15 or SUBSET=tb2-full; see RESEARCH.md for the current GPU-based 4.0 track")
+        raise ValueError("use SUBSET=tb2-fast15 or SUBSET=tb2-full; see docs/terminal-bench.md for the current GPU-based 4.0 track")
     runner += ["-e", "docker", "-a", "terminus-2", "-m", "openai/" + (model or "qwen3.5:4b-q4_K_M"),
                "--base-url", "http://127.0.0.1:11435/v1", "-n", "1", "-k", attempts,
                "-o", str(ROOT / "runs/harbor"), "--ak", "temperature=0", "--ak", "reasoning_effort=none",
@@ -37,7 +37,7 @@ def main():
     args = parser.parse_args()
     print("# Official Terminus 2 reference command. Not executed by this planner.")
     print("# First start Docker yourself and confirm docker info succeeds.")
-    print("# The local baseline measured tonight is mini-SWE-agent, not Terminus 2.")
+    print("# The measured local baseline is mini-SWE-agent, not Terminus 2.")
     print("OPENAI_API_KEY=local " + shlex.join(command(args.subset, os.environ.get("MODEL"))))
 
 

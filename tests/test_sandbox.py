@@ -1,5 +1,6 @@
 import os
 import shlex
+import socket
 import time
 from pathlib import Path
 
@@ -16,10 +17,15 @@ def test_shell_can_work_but_cannot_escape(tmp_path):
     assert s.run('cat ../outside')["returncode"]!=0
     assert s.run('echo bad > ../outside')["returncode"]!=0
     assert outside.read_text()=='private'
-    network_code = 'import socket;socket.create_connection(("127.0.0.1",11435),timeout=1)'
-    network_result = s.run('python3 -c ' + shlex.quote(network_code))
+    # A real listener on the host's loopback must be unreachable from inside.
+    with socket.socket() as listener:
+        listener.bind(("127.0.0.1", 0)); listener.listen()
+        port = listener.getsockname()[1]
+        network_code = f'import socket;socket.create_connection(("127.0.0.1",{port}),timeout=1)'
+        network_result = s.run('python3 -c ' + shlex.quote(network_code))
     assert network_result["returncode"]!=0
-    assert 'PermissionError' in network_result['output'] or 'Operation not permitted' in network_result['output']
+    blocked = ('PermissionError', 'Operation not permitted', 'ConnectionRefusedError', 'Network is unreachable')
+    assert any(marker in network_result['output'] for marker in blocked)
     assert s.run(f'cat {shlex.quote(str(ROOT / "suites/mini-v1/merge-config/verify.py"))}')["returncode"]!=0
 
 

@@ -29,7 +29,8 @@ def validate_experiment(config, identity, suite, subset, steps, task_timeout, fe
     if os.getenv("HARNESS_REASONING_EFFORT", "none") != "none":
         raise ValueError("Phase 2 keeps reasoning_effort=none")
     if core_digest() != spec["frozen_core_sha256"]:
-        raise ValueError("Phase 2 core changed after preregistration; do not silently mix revisions")
+        raise ValueError("Phase 2 core changed after preregistration; do not silently mix revisions. "
+                         "Check out the `phase2-results` tag to reproduce those runs.")
     return {"spec_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
             "reference_run": spec["reference_run"], "features": sorted(features),
             "frozen_core_sha256": spec["frozen_core_sha256"],

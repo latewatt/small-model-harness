@@ -110,7 +110,7 @@ def pull(model):
     ram = int(subprocess.check_output(["sysctl", "-n", "hw.memsize"]))
     cap = min(4 * 1024**3, ram // 4)
     if size > cap:
-        raise SystemExit(f"Model download {size} bytes exceeds this Mac's conservative {cap} byte cap.")
+        raise SystemExit(f"Model download {size} bytes exceeds the conservative {cap} byte cap.")
     print(f"Downloading {model}: {size} bytes into {ROOT / 'models'}", flush=True)
     req = urllib.request.Request(URL + "/api/pull", data=json.dumps({"model": model, "stream": True}).encode(), headers={"Content-Type":"application/json"})
     last = 0

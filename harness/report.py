@@ -91,7 +91,7 @@ def report(root=ROOT):
     if not runs:
         raise ValueError("No complete mini10 runs. Smoke runs are not score runs.")
     lines = ["# Measured local results", "",
-             "These are local mini-suite measurements, **not Terminal-Bench scores**. Docker's daemon was unavailable; the requested fallback was used. No hosted model was used. No claim of harness improvement is implied by implementing v0.", "",
+             "These are local mini-suite measurements, **not Terminal-Bench scores**. Docker was unavailable for these runs, so the local mini-suite was used. No hosted model was used. No claim of harness improvement is implied by implementing v0.", "",
              "All performance numbers below are recomputed from saved run artifacts. Every complete mini10 run is included; development smoke runs and synthetic endpoint probes are excluded. No failed run is dropped and token accounting is not estimated. The combination is selected after the single-change ablations; this is development-set selection, not held-out validation.", "",
              "## Ablation table", "",
              "| Agent / variant | Enabled changes | Passed / tasks | Pass rate | Task wall (s) | Input tokens | Output tokens | Calls |",
