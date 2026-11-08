@@ -1,0 +1,31 @@
+# Environments
+.venv/
+.venv-harbor/
+venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+
+# Tool caches and local state
+.cache/
+.runtime/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.DS_Store
+
+# Measured runs are large; publish a selected evidence bundle instead.
+runs/
+
+# Model weights never belong in git
+models/
+weights/
+*.gguf
+*.safetensors
+*.bin
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
