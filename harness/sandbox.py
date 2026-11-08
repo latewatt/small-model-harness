@@ -57,7 +57,10 @@ class Sandbox:
     def _write_seatbelt_profile(self):
         readable = self.readable
         self.profile = self.work.parent / (self.work.name + ".sb")
-        read_paths = ["/System", "/usr", "/bin", "/sbin", "/opt/homebrew", "/Library/Apple", "/private/etc", str(ROOT / ".venv"), str(self.work)]
+        # The venv and the interpreter it links to (uv keeps Pythons under the
+        # home directory, which the profile otherwise denies).
+        read_paths = ["/System", "/usr", "/bin", "/sbin", "/opt/homebrew", "/Library/Apple", "/private/etc",
+                      *(str(path) for path in _venv_paths()), str(self.work)]
         read_rules = " ".join(f"(subpath {json.dumps(p)})" for p in read_paths)
         read_rules += " ".join(f" (literal {quoted_path(Path(p))})" for p in readable)
         self.profile.write_text(
