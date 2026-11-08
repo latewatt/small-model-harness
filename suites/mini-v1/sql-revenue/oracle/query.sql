@@ -1,0 +1,1 @@
+SELECT c.id,c.name,COALESCE(SUM(i.quantity*i.unit_price_cents),0) AS revenue_cents FROM customers c LEFT JOIN orders o ON o.customer_id=c.id AND o.status='completed' LEFT JOIN items i ON i.order_id=o.id WHERE c.active=1 GROUP BY c.id,c.name ORDER BY revenue_cents DESC,c.id ASC;

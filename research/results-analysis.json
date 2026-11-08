@@ -1,0 +1,37 @@
+{
+  "findings": [
+    "**The measured v0 is worse than the reference on this suite.** Its shorter runtime and lower token use reflect early failures, not greater efficiency at completing tasks. The [v0 task records](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/tasks.jsonl) show nine `format_budget` exits and one `loop_budget` exit. All failed the independent grader. The baseline solved five tasks; three of those still ended at the upstream step limit. Submission status and correctness are deliberately separate.",
+    "",
+    "**Malformed actions dominate v0.** On [merge-config](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/merge-config/trace.jsonl), the model repeated a shell object followed by a finish object in the same response; all three attempts were rejected before execution. On [csv-totals](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/csv-totals/trace.jsonl), it repeatedly omitted `args` and added an unmatched closing brace. On [toposort](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/toposort/trace.jsonl), it kept requesting a zero-based start line despite positive-line validation. The baseline also emitted malformed actions, but its traces contain successful recovery and task completions.",
+    "",
+    "**Some corrective retries work, but the edit interface adds another failure point.** In [jsonl-cli](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/jsonl-cli/trace.jsonl), v0 changed an invalid read with a `command` argument into a valid read with `path`. It then copied the displayed line-number prefixes into both patch strings. Exact-match patching safely rejected that edit without changing the file. Later invalid JSON exhausted the format budget. This is an interface mismatch as well as a model error; widening the step budget alone would not establish a fix.",
+    "",
+    "**A valid edit or confident finish is not a correct program.** The baseline [CSV submission](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/csv-totals/submission/report.py) uses `int(float(amount_str) * 100)`; the actual [graded output](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/csv-totals/work/answer.json) contains `Ada: 28`, while the [grader](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/csv-totals/verifier.log) requires `Ada: 29`. [merge-config](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/merge-config/submission/merge.py) retains aliases into input data and fails the [independence check](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/merge-config/verifier.log). [intervals](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/intervals/submission/intervals.py) can shrink an enclosing interval and mutate an input list. The [JSONL CLI grader](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/jsonl-cli/verifier.log) observes only `b\\n` where `a\\nb\\n` is required because the [submission](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/jsonl-cli/submission/select_rows.py) excludes numeric strings. The [config-parser grader](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/config-parser/verifier.log) catches conversion of non-ASCII digits that should remain text.",
+    "",
+    "**The repetition guard is too coarse.** In [v0 config-parser](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/config-parser/trace.jsonl), a fourth identical `read(config.py)` stops the task even though patches occurred between reads. The trace also shows self-written tests that contradict the task's line-based format and integer requirements. The guard prevents unbounded work, but it does not distinguish necessary reinspection from a stalled loop.",
+    "",
+    "**Compaction was exercised; context overflow was not observed.** v0 recorded seven compactions across [jsonl-cli](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/jsonl-cli/trace.jsonl) and [config-parser](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/config-parser/trace.jsonl). The extractive ledger becomes repetitive and can omit useful outcomes. These traces do not establish that compaction caused the failures. No v0 observation-truncation event occurred in the scored runs; its truncation behavior is covered by offline tests, and the baseline's upstream observation elision is not counted by that event. No transport failure or missing token usage occurred in either scored run."
+  ],
+  "ideas": [
+    {
+      "title": "Constrain the action shape at generation time",
+      "reason": "Try native tool calling or an endpoint-supported JSON schema for exactly one action, with complete argument schemas and minimal optional fields. This addresses the nine format-budget exits in the [v0 task records](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/tasks.jsonl). Keep strict validation; compare this change alone before adding more machinery."
+    },
+    {
+      "title": "Make corrective feedback specific to the failed tool",
+      "reason": "Return a single valid example for the exact invalid field or envelope, and avoid generic shell-plus-finish examples that could encourage multiple actions. Detect identical invalid replies and change the repair instruction within a fixed repair budget. [jsonl-cli](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/jsonl-cli/trace.jsonl) shows a successful argument repair; [merge-config](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/merge-config/trace.jsonl) shows the same invalid response surviving every retry."
+    },
+    {
+      "title": "Align reading and patching",
+      "reason": "Provide raw code separately from line-number metadata, explicitly mark which text is patchable, and add a bounded syntax check before committing Python edits. The copied prefixes in the [failed patch](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/jsonl-cli/trace.jsonl) are a concrete preventable failure. Preserve exact-match/no-mutation behavior on ambiguous patches; do not silently guess a replacement."
+    },
+    {
+      "title": "Turn requirements into checks before submission",
+      "reason": "Have the agent extract behavioral constraints and write small tests for them before declaring completion. Prioritize copy independence, decimal arithmetic, accepted input types and mutation requirements demonstrated by the [baseline failures](runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a/tasks.jsonl). Evaluate against unchanged hidden graders; do not feed their answers into the scored attempt. Check that self-written tests agree with the original task."
+    },
+    {
+      "title": "Track progress and preserve useful memory",
+      "reason": "Key repetition decisions to file versions and observation changes so rereading a modified file is allowed. Replace recursively clipped prose with a compact ledger of edits, test outcomes and unresolved constraints. Run separate ablations for the detector and memory policy: [config-parser](runs/20261106T200920Z-v0-qwen3-5-4b-q4-K-M-mini10-74fa5d/config-parser/trace.jsonl) supplies evidence for both, but the current comparison cannot identify their individual effects."
+    }
+  ]
+}

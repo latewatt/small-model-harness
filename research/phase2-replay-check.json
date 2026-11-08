@@ -1,0 +1,19 @@
+{
+  "task": "csv-totals",
+  "runs": [
+    "runs/20261106T212825Z-combo-constrained-aligned-versions-requirements-qwen3-5-4b-q4-K-M-mini10-d054d7",
+    "runs/20261106T214547Z-combo-constrained-aligned-versions-requirements-repair-qwen3-5-4b-q4-K-M-mini10-f597e7"
+  ],
+  "first_request_identical": true,
+  "first_response_identical": true,
+  "first_differing_request": 2,
+  "repair_feedback_counts": [
+    0,
+    0
+  ],
+  "note": "A fixed seed does not make the whole interaction identical: tool timings, fresh paths and filesystem timestamps can change subsequent observations. No claim of a specific backend cause is made.",
+  "changed_observation_fields": [
+    "wall_s",
+    "output"
+  ]
+}

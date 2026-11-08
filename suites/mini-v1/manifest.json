@@ -1,0 +1,56 @@
+{
+  "name": "mini-v1",
+  "kind": "local-development-not-terminal-bench",
+  "tasks": [
+    {
+      "id": "csv-totals",
+      "category": "data-processing",
+      "path": "suites/mini-v1/csv-totals"
+    },
+    {
+      "id": "merge-config",
+      "category": "python-repair",
+      "path": "suites/mini-v1/merge-config"
+    },
+    {
+      "id": "intervals",
+      "category": "algorithm",
+      "path": "suites/mini-v1/intervals"
+    },
+    {
+      "id": "toposort",
+      "category": "algorithm",
+      "path": "suites/mini-v1/toposort"
+    },
+    {
+      "id": "log-summary",
+      "category": "terminal-data",
+      "path": "suites/mini-v1/log-summary"
+    },
+    {
+      "id": "jsonl-cli",
+      "category": "cli",
+      "path": "suites/mini-v1/jsonl-cli"
+    },
+    {
+      "id": "sql-revenue",
+      "category": "sql",
+      "path": "suites/mini-v1/sql-revenue"
+    },
+    {
+      "id": "repair-package",
+      "category": "multi-file",
+      "path": "suites/mini-v1/repair-package"
+    },
+    {
+      "id": "path-index",
+      "category": "filesystem",
+      "path": "suites/mini-v1/path-index"
+    },
+    {
+      "id": "config-parser",
+      "category": "parser",
+      "path": "suites/mini-v1/config-parser"
+    }
+  ]
+}

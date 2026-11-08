@@ -1,0 +1,33 @@
+{
+  "phase": 2,
+  "reference_run": "runs/20261106T194030Z-baseline-qwen3-5-4b-q4-K-M-mini10-25962a",
+  "fixed": {
+    "model": "qwen3.5:4b-q4_K_M",
+    "suite_sha256": "8e52bafd53c0b781f712d88cecfb10c4d32705a64021f1194842d86479ccc381",
+    "subset": "mini10",
+    "steps": 16,
+    "task_timeout_s": 600.0,
+    "max_tokens": 1024,
+    "temperature": 0.0,
+    "seed": 17,
+    "base_url": "http://127.0.0.1:11435/v1",
+    "model_digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+    "request_timeout_s": 90
+  },
+  "frozen_core_sha256": "dbde49a3f5d246733e81800c6a344b86b4327ec2892490baca2a4005ac044250",
+  "single_variants": [
+    "v0-constrained",
+    "v0-repair",
+    "v0-aligned",
+    "v0-requirements",
+    "v0-versions"
+  ],
+  "selection_policy": "After all five single-change runs, combine the best-scoring feature with features whose traces demonstrate a mechanical benefit without a new blocking failure. Resolve ties using lower malformed-action count, then lower token usage. Never use hidden grader content or task-specific solution hints. Preserve all runs; declare a win only for more than five passes.",
+  "development_policy": "All five implementations frozen before scoring. New tests use unrelated synthetic fixtures. Endpoint probes are outside the scored suite. No post-score implementation tuning.",
+  "server_settings": {
+    "context_length": 8192,
+    "num_parallel": 1,
+    "max_loaded_models": 1,
+    "reasoning_effort": "none"
+  }
+}

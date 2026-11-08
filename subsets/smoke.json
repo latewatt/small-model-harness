@@ -1,0 +1,6 @@
+{
+  "suite": "mini-v1",
+  "tasks": [
+    "merge-config"
+  ]
+}

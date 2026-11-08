@@ -1,0 +1,24 @@
+{
+  "dataset": "terminal-bench/terminal-bench-2@sha256:c6fc2e2382c1dbae99b2d5ecd2f4f4a60c3c01e0d84642d69b4afd92e99d078b",
+  "benchmark_version": "2.0",
+  "source": "https://hub.harborframework.com/datasets/terminal-bench/terminal-bench-2/latest?tab=tasks",
+  "selection": "Manual CPU-oriented iteration candidates, frozen before any Terminal-Bench model run. Fast is a design intention, not a measured timing claim. Validate image architecture and build costs once Docker is running.",
+  "tasks": [
+    "log-summary-date-ranges",
+    "openssl-selfsigned-cert",
+    "cancel-async-tasks",
+    "git-leak-recovery",
+    "db-wal-recovery",
+    "extract-elf",
+    "fix-git",
+    "multi-source-data-merger",
+    "git-multibranch",
+    "regex-log",
+    "nginx-request-logging",
+    "sanitize-git-repo",
+    "filter-js-from-html",
+    "fix-code-vulnerability",
+    "large-scale-text-editing"
+  ],
+  "resolved_revision": "1"
+}

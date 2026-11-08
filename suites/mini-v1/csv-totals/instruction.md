@@ -1,0 +1,1 @@
+Fix report.py. CLI: python3 report.py INPUT.csv OUTPUT.json. CSV columns customer,amount,status; quoted names may contain commas. Sum only rows whose status is exactly paid, in integer cents per customer; amounts are decimal strings with at most two fractional digits and can be negative. Exclude customers without paid rows. Output a JSON object. Preserve the input file.

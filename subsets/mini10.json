@@ -1,0 +1,15 @@
+{
+  "suite": "mini-v1",
+  "tasks": [
+    "csv-totals",
+    "merge-config",
+    "intervals",
+    "toposort",
+    "log-summary",
+    "jsonl-cli",
+    "sql-revenue",
+    "repair-package",
+    "path-index",
+    "config-parser"
+  ]
+}

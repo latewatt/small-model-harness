@@ -1,0 +1,1 @@
+Fix merge.py: deep_merge(left, right) recursively merges dictionaries, with right values winning. Lists are replaced, not concatenated. Neither input nor any nested value may be mutated or aliased in the result. Inputs are JSON-compatible dicts.

@@ -1,0 +1,1 @@
+Fix graph.py: order_tasks(dependencies) maps task names to lists of prerequisite names. Return all names including prerequisites absent as dictionary keys, each after its prerequisites. At every step choose the lexicographically smallest currently available task. Duplicate prerequisites count once. Raise ValueError on any cycle. Do not mutate inputs.

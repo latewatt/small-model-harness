@@ -1,0 +1,1 @@
+Fix indexer.py: python_files(root) returns sorted relative POSIX paths of all .py files recursively. Ignore files and directories with names starting '.', and never include or follow any symlink. Handle spaces and Unicode. Do not modify files. root exists and is a directory.

@@ -1,0 +1,4 @@
+customer,amount,status
+"Acme, Inc",12.30,paid
+Ada,2.10,pending
+"Acme, Inc",-1.20,paid

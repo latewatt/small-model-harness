@@ -1,0 +1,11 @@
+{
+  "candidates": [
+    "combo-constrained-aligned-versions",
+    "combo-constrained-aligned-versions-requirements",
+    "combo-constrained-aligned-versions-requirements-repair"
+  ],
+  "rationale": "Constrained decoding is the highest-scoring isolated change and removes format-budget exits. Alignment has a directly observed syntax rejection and successful raw-code patch dispatches, while the file-version guard addresses the original legitimate-reread stop. Requirement checks are tested next behind the working protocol because their isolated run reached its finish gate only once, blocked by a missing requirements artifact. Targeted repair is added last to test residual token-cutoff recovery. Each successive candidate adds only one feature; no agent implementation changes are permitted.",
+  "selection": "Report every candidate. Select highest pass count; break ties by fewer parse errors, then fewer total provider-reported tokens, then lower task wall time. A win requires at least six of ten tasks, not merely valid JSON.",
+  "limitations": "Combination selection is on the development suite. No hidden grader content is inspected or used. These configurations were declared before any combination was scored.",
+  "factual_correction": "Corrected the finish-gate description after counting trace events. One attempt was blocked for a missing artifact; there were no successful checks. Candidate configurations, order, selection rule and frozen implementation are unchanged. The original declaration is preserved in phase2-combination-plan-original.json."
+}

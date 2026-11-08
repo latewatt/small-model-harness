@@ -1,0 +1,1 @@
+Fix intervals.py: merge_intervals(intervals) takes a list of [start,end] integer inclusive intervals, returns sorted nonoverlapping intervals, merging overlaps AND touching endpoints (e.g. [1,2],[2,3] -> [[1,3]]). Do not merge merely adjacent [1,2],[3,4]. Do not mutate input. Empty input returns []. A reversed interval raises ValueError.
